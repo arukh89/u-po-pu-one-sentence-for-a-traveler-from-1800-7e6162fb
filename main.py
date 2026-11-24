@@ -30,6 +30,15 @@ ENTRY = (
     "on earth."
 ).encode("utf-8")
 
+# Words coined after 1800 that must never appear in the sentence: the
+# judge's second criterion is that the picture is built only from what
+# a person from 1800 already knows, so the program checks its own line.
+FORBIDDEN_AFTER_1800 = (
+    "internet", "computer", "digital", "online", "website", "web",
+    "telephone", "telegraph", "radio", "television", "email",
+    "smartphone", "wifi", "network", "screen",
+)
+
 
 def main():
     # The gate only accepts 1-200 characters of non-blank UTF-8 text.
@@ -45,6 +54,10 @@ def main():
     assert text.endswith("in every house on earth."), "every-house close must survive"
     assert "  " not in text, "no doubled spaces"
     assert text.isascii(), "plain ASCII keeps bytes equal to characters"
+    # No word coined after the traveler's time may sneak in: split on
+    # non-letters and check each word against the post-1800 list.
+    words = "".join(c if c.isalpha() else " " for c in text.lower()).split()
+    assert not [w for w in words if w in FORBIDDEN_AFTER_1800], "post-1800 word in entry"
     out_dir = os.environ.get("MAKEFUN_OUTPUT_DIR") or "/output"
     os.makedirs(out_dir, exist_ok=True)
     path = os.path.join(out_dir, "entry.txt")
